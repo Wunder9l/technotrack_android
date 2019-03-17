@@ -9,6 +9,8 @@ import kotlinx.android.synthetic.main.activity_second.*
 import java.util.concurrent.TimeUnit
 
 class SecondActivity : AppCompatActivity() {
+    var counter = 0
+    var isCountDown = false
     val timer = object : CountDownTimer(TimeUnit.SECONDS.toMillis(1000), TimeUnit.SECONDS.toMillis(1)) {
         override fun onFinish() {
             start()
@@ -22,18 +24,26 @@ class SecondActivity : AppCompatActivity() {
 
     override fun onStop() {
         Log.d("onStop", "stop $this")
+        timer.cancel()
         super.onStop()
     }
 
     override fun onDestroy() {
         Log.d("onDestroy", "destroy $this")
-        timer.cancel()
         super.onDestroy()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        outState?.putBoolean("isCountDown", isCountDown)
+        outState?.putInt("counter", counter)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
+        counter = savedInstanceState?.getInt("counter") ?: 0
+        isCountDown = savedInstanceState?.getBoolean("isCountDown") ?: false
 
         if (counter == 0) {
             restoreState()
@@ -42,7 +52,7 @@ class SecondActivity : AppCompatActivity() {
             if (isCountDown) {
                 button.text = "stop"
                 button.setOnClickListener { stopButtonPressed() }
-                 timer.start()
+                timer.start()
             } else {
 //                timer.cancel()
                 button.text = "start"
@@ -61,7 +71,6 @@ class SecondActivity : AppCompatActivity() {
     }
 
     private fun startButtonPressed() {
-//        counter = if (counter == 0) 1 else counter
         updateState()
         button.text = "stop"
         button.setOnClickListener { stopButtonPressed() }
@@ -77,18 +86,13 @@ class SecondActivity : AppCompatActivity() {
     }
 
     private fun updateState() {
-        if (counter == 10) {
+        if (counter == 1000) {
             restoreState()
             textView.text = "тысяча"
         } else {
             textView.text = toText(counter)
             Log.d("updateState", "$counter - ${textView.text}")
         }
-    }
-
-    companion object {
-        var counter: Int = 0
-        var isCountDown: Boolean = false
     }
 
 }
